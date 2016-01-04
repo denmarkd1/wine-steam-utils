@@ -1,0 +1,26 @@
+#! /bin/bash
+
+appid=$1
+procname=$2
+PREFIX=/home/mark/.wine-steam
+STEAM="/home/mark/.wine-steam/drive_c/Program Files/Steam/Steam.exe"
+export WINEDEBUG=-all
+export WINEPREFIX=$PREFIX
+
+if [[ ((`pgrep -f steam.exe -c` == 0)) && ((`pgrep -f Steam.exe -c` == 0)) ]]; then
+  optirun wine "$STEAM" -silent &
+  sleep 20
+fi
+echo "Running game"
+wine "$STEAM" steam://rungameid/$appid &
+sleep 15
+echo "Starting checks"
+status=`pgrep -f $procname -c`
+if (( "$status" > 1 )); then
+  while (( "$status" > 1 )); do
+    sleep 5
+    status=`pgrep -f $procname -c`
+  done
+  wine "$STEAM" -shutdown &
+fi
+echo "Exiting"
